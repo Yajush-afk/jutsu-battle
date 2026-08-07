@@ -1,0 +1,56 @@
+schema_version: 1
+labels:
+  - "0"
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+  - "5"
+  - "6"
+  - "7"
+  - "8"
+  - "9"
+  - "10"
+  - unknown
+detector_only_states:
+  - no_hands
+image_size: 160
+max_hands: 2
+poses:
+  "0":
+    required_hands: 1
+    extended_fingers: 0
+  "1":
+    required_hands: 1
+    extended_fingers: 1
+  "2":
+    required_hands: 1
+    extended_fingers: 2
+  "3":
+    required_hands: 1
+    extended_fingers: 3
+  "4":
+    required_hands: 1
+    extended_fingers: 4
+  "5":
+    required_hands: 1
+    extended_fingers: 5
+  "6":
+    required_hands: 2
+    extended_fingers: 6
+  "7":
+    required_hands: 2
+    extended_fingers: 7
+  "8":
+    required_hands: 2
+    extended_fingers: 8
+  "9":
+    required_hands: 2
+    extended_fingers: 9
+  "10":
+    required_hands: 2
+    extended_fingers: 10
+  unknown:
+    required_hands: null
+    extended_fingers: null
+
