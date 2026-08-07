@@ -13,6 +13,15 @@ authors = [
   { name = "Yajush-afk" },
 ]
 
+[project.scripts]
+jutsu-capture-numbers = "jutsu_battle.number_identifier.capture:main"
+jutsu-build-number-dataset = "jutsu_battle.number_identifier.dataset:main"
+jutsu-train-numbers = "jutsu_battle.number_identifier.train:main"
+jutsu-compare-numbers = "jutsu_battle.number_identifier.compare:main"
+jutsu-evaluate-numbers = "jutsu_battle.number_identifier.evaluate:main"
+jutsu-number-app = "jutsu_battle.number_identifier.app:main"
+jutsu-release-number = "jutsu_battle.number_identifier.release:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
