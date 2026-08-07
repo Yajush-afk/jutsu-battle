@@ -1,0 +1,19 @@
+schema_version: 1
+model_name: mini_cnn
+image_size: 160
+class_count: 12
+batch_size: 32
+maximum_epochs: 50
+early_stopping_patience: 8
+learning_rate: 0.0003
+weight_decay: 0.0001
+label_smoothing: 0.05
+random_seed: 20260808
+num_workers: 2
+checkpoint_metric: macro_f1
+manifests:
+  train: data/manifests/numbers_train.csv
+  validation: data/manifests/numbers_validation.csv
+capture_root: data/raw/numbers
+output_directory: outputs/number_cnn
+
