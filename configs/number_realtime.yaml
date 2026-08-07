@@ -1,0 +1,14 @@
+schema_version: 1
+camera_index: 0
+frame_width: 640
+frame_height: 480
+mirror: true
+confidence_threshold: 0.75
+vote_window: 10
+required_votes: 8
+stable_duration_ms: 300
+release_duration_ms: 150
+crop_padding_ratio: 0.20
+detection_interval_frames: 2
+show_landmarks: true
+show_fps: true

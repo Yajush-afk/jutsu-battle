@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
@@ -116,25 +117,43 @@ class HandDetector:
         model_path: Path,
         *,
         max_hands: int = 2,
+        processing_width: int = 640,
         minimum_detection_confidence: float = 0.5,
         minimum_presence_confidence: float = 0.5,
         minimum_tracking_confidence: float = 0.5,
     ) -> None:
         options = vision.HandLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=str(model_path)),
-            running_mode=vision.RunningMode.IMAGE,
+            running_mode=vision.RunningMode.VIDEO,
             num_hands=max_hands,
             min_hand_detection_confidence=minimum_detection_confidence,
             min_hand_presence_confidence=minimum_presence_confidence,
             min_tracking_confidence=minimum_tracking_confidence,
         )
         self._landmarker = vision.HandLandmarker.create_from_options(options)
+        self._last_timestamp_ms = 0
+        self._processing_width = processing_width
 
     def detect(self, bgr_frame: np.ndarray[Any, Any]) -> HandDetection:
         """Detect hands in an OpenCV BGR image."""
-        rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
+        frame_height, frame_width = bgr_frame.shape[:2]
+        inference_frame = bgr_frame
+        if frame_width > self._processing_width:
+            scale = self._processing_width / frame_width
+            inference_height = round(frame_height * scale)
+            inference_frame = cv2.resize(
+                bgr_frame,
+                (self._processing_width, inference_height),
+                interpolation=cv2.INTER_AREA,
+            )
+        rgb_frame = cv2.cvtColor(inference_frame, cv2.COLOR_BGR2RGB)
         image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        result = self._landmarker.detect(image)
+        timestamp_ms = max(
+            self._last_timestamp_ms + 1,
+            int(time.monotonic() * 1000),
+        )
+        self._last_timestamp_ms = timestamp_ms
+        result = self._landmarker.detect_for_video(image, timestamp_ms)
         hands: list[DetectedHand] = []
         for index, raw_landmarks in enumerate(result.hand_landmarks):
             category = result.handedness[index][0]
