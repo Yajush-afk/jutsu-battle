@@ -1,0 +1,44 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments and local configuration
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+
+# Private or generated project data
+data/raw/
+data/processed/
+data/private/
+checkpoints/
+runs/
+outputs/
+logs/
+
+# Trained models and captured media
+*.pt
+*.pth
+*.onnx
+*.mp4
+*.avi
+
