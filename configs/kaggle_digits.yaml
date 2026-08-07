@@ -1,0 +1,22 @@
+schema_version: 1
+dataset_root: data/external/kaggle/hand-sign-gesture-dataset-az-09-25k-images
+manifest_directory: data/manifests/kaggle_digits
+labels: digits
+split_seed: 20260808
+validation_fraction: 0.10
+test_fraction: 0.10
+training:
+  model_name: mini_cnn
+  pretrained: false
+  image_size: 160
+  batch_size: 32
+  maximum_epochs: 35
+  early_stopping_patience: 7
+  learning_rate: 0.0003
+  minimum_learning_rate: 0.000001
+  weight_decay: 0.0001
+  label_smoothing: 0.05
+  random_seed: 20260808
+  num_workers: 4
+  mixed_precision: true
+  output_directory: outputs/kaggle_digits/mini_cnn

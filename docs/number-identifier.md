@@ -1,142 +1,149 @@
-# Two-Hand Number Identifier Operator Guide
+# Kaggle Number Identifier Operator Guide
 
-The number identifier recognizes the canonical poses defined in
-`docs/number-gesture-spec.md`. It is a self-contained vision milestone and a
-source of reusable camera, preprocessing, training, evaluation, and inference
-components for Jutsu Battle.
+The Phase 1 learning milestone trains a CNN on the numeric `0`–`9` subset of
+Debabrata Kuiry's **Hand Sign Gesture Dataset (A–Z & 0–9)**. The public dataset
+is never committed to Git.
 
-## 1. Environment
+## 1. Download and extract
+
+Download the dataset archive from:
+
+<https://www.kaggle.com/datasets/debabratakuiry/hand-sign-gesture-dataset-az-and-09-25k-images>
+
+Extract its contents into exactly:
+
+```text
+data/external/kaggle/hand-sign-gesture-dataset-az-09-25k-images/
+```
+
+An extra wrapper directory created by Kaggle is acceptable. The importer finds
+the class folders recursively. It expects image-containing folders named `0`
+through `9`; alphabet folders are ignored in the first experiment.
+
+## 2. Prepare deterministic manifests
 
 ```bash
 conda activate naruto
 python -m pip install --editable . --no-deps
+jutsu-prepare-kaggle
 ```
 
-The first capture command automatically downloads the free MediaPipe
-hand-landmarker asset to `models/mediapipe/`. No upload or account is required.
+Preparation verifies every image and creates a balanced 80/10/10 image-level
+train/validation/test split under `data/manifests/kaggle_digits/`. It does not
+copy or alter the source images.
 
-## 2. Camera check
+Inspect `data/manifests/kaggle_digits/dataset_summary.json` before training. The
+public description does not provide participant or recording-session IDs, so a
+random image split may contain nearby frames from the same source session in
+different splits. Report this limitation with the final metrics.
+
+## 3. Train the digit CNN from a terminal
 
 ```bash
-jutsu-capture-numbers --probe-camera --camera-index 0
+jutsu-train-kaggle --config configs/kaggle_digits.yaml
 ```
 
-If camera index 0 is unavailable, try another index. The command reads one
-frame and saves nothing.
+The command prints live batch loss/accuracy progress and an epoch summary with
+training and validation loss, accuracy, macro-F1, learning rate, time, early
+stopping state, and whether a new best checkpoint was saved.
 
-## 3. Participant collection
-
-Use anonymous participant and session identifiers:
-
-```bash
-jutsu-capture-numbers \
-  --subject-id subject_001 \
-  --session-id session_01 \
-  --camera-index 0
-```
-
-Collector controls:
+Artifacts are written to:
 
 ```text
-A / D   previous or next label
-U       jump to unknown
-SPACE   record a three-second clip
-X       discard the current or most recent clip
-Q / ESC quit
+outputs/kaggle_digits/mini_cnn/best.pt
+outputs/kaggle_digits/mini_cnn/last.pt
+outputs/kaggle_digits/mini_cnn/history.csv
+outputs/kaggle_digits/mini_cnn/tensorboard/
 ```
 
-Repeat for 15 participants and two sessions per participant. Capture four clips
-per numeric class and at least ten unknown/transition clips per session. Raw
-frames remain under `data/raw/numbers/` and are ignored by Git.
-
-## 4. Locked manifests
+`best.pt` is selected by validation macro-F1. `last.pt` supports recovery after
+an interruption:
 
 ```bash
-jutsu-build-number-dataset
+jutsu-train-kaggle \
+  --config configs/kaggle_digits.yaml \
+  --resume outputs/kaggle_digits/mini_cnn/last.pt
 ```
 
-This refuses fewer than 15 participants, creates the locked 10/2/3 subject
-split, rejects path escape and missing files, removes near-duplicates, and
-writes:
+Temporary command-line overrides are available without editing YAML:
+
+```bash
+jutsu-train-kaggle --epochs 5 --batch-size 16 --workers 2
+```
+
+If CUDA runs out of memory, retry with `--batch-size 16`. Do not increase batch
+size merely to maximize GPU memory; validation quality and stable execution are
+more important.
+
+## 4. Default hyperparameters
 
 ```text
-data/manifests/numbers_train.csv
-data/manifests/numbers_validation.csv
-data/manifests/numbers_test.csv
-data/manifests/number_subject_splits.json
+Architecture:          four-block MiniNumberCNN, trained from scratch
+Input:                 160 × 160 RGB
+Classes:               0–9
+Batch size:            32
+Maximum epochs:        35
+Optimizer:             AdamW
+Learning rate:         3e-4
+Minimum learning rate: 1e-6
+Scheduler:             cosine annealing
+Weight decay:          1e-4
+Loss:                  cross-entropy
+Label smoothing:       0.05
+Early-stop patience:   7 epochs
+Checkpoint metric:     validation macro-F1
+Mixed precision:       enabled on CUDA
+Workers:               4
+Seed:                  20260808
 ```
 
-Never delete or regenerate the split lock after model selection begins.
+These defaults target the installed RTX 3050 Ti Laptop GPU with 4 GB VRAM.
 
-## 5. Baseline training
+## 5. Optional visual analytics
+
+No notebook is required. `history.csv` contains all epoch metrics. TensorBoard
+is also available if a graph is useful:
 
 ```bash
-jutsu-train-numbers \
-  --train-manifest data/manifests/numbers_train.csv \
-  --validation-manifest data/manifests/numbers_validation.csv \
-  --capture-root data/raw/numbers \
-  --output-directory outputs/number_cnn \
-  --model-name mini_cnn
+tensorboard --logdir outputs/kaggle_digits/mini_cnn/tensorboard
 ```
 
-## 6. Model comparison
+The terminal prints the local address to open in a browser.
+
+## 6. All 36 signs later
+
+After completing and reviewing the digit milestone, the same importer supports
+all letters and digits:
 
 ```bash
-jutsu-compare-numbers \
-  --train-manifest data/manifests/numbers_train.csv \
-  --validation-manifest data/manifests/numbers_validation.csv \
-  --capture-root data/raw/numbers \
-  --output-directory outputs/number_comparison
+jutsu-prepare-kaggle \
+  --labels all \
+  --output-directory data/manifests/kaggle_all_signs
+
+jutsu-train-kaggle --config configs/kaggle_all_signs.yaml
 ```
 
-This trains the custom CNN, ImageNet-pretrained MobileNetV3-Small, and the
-normalized-landmark MLP. Model selection uses validation macro-F1 only.
+The 36-class configuration uses ImageNet-pretrained MobileNetV3-Small at
+`192×192`, batch size 24. It is feasible on this machine, but it is a separate,
+longer experiment rather than a requirement for the number identifier.
 
-## 7. Final test evaluation
+## 7. Webcam check
 
-After choosing one checkpoint, evaluate the locked test set once:
-
-```bash
-jutsu-evaluate-numbers \
-  --checkpoint outputs/number_comparison/<selected-model>/best.pt \
-  --manifest data/manifests/numbers_test.csv \
-  --capture-root data/raw/numbers \
-  --output-directory outputs/number_final_evaluation
-```
-
-The evaluator writes metrics, confusion artifacts, calibration, latency, and
-release-gate results. Do not tune the model against this test report.
-
-## 8. Live application
+After training finishes, run the best checkpoint against the local camera:
 
 ```bash
 jutsu-number-app \
-  --checkpoint outputs/number_comparison/<selected-model>/best.pt
+  --checkpoint outputs/kaggle_digits/mini_cnn/best.pt
 ```
 
-Press `Q` or Escape to exit and `R` to reset temporal state.
+The public model uses the class order stored inside its checkpoint and does not
+apply the older custom `6`–`10` two-hand rules. Press `Q` or Escape to exit and
+`R` to clear temporal prediction state.
 
-## 9. Guarded release bundle
+## 8. Personal fine-tuning
 
-```bash
-jutsu-release-number \
-  --checkpoint outputs/number_comparison/<selected-model>/best.pt \
-  --evaluation-directory outputs/number_final_evaluation \
-  --output-root outputs/releases
-```
-
-The bundler refuses smoke checkpoints and any evaluation that does not pass
-every acceptance gate. Add `--publish` only when the resulting production
-bundle should create the GitHub release and tag.
-
-## Smoke verification
-
-Generated patterns can exercise the complete code path without pretending to
-measure recognition quality:
-
-```bash
-python -m jutsu_battle.number_identifier.smoke_data --overwrite
-```
-
-Every smoke checkpoint contains `smoke_only: true`; the live app requires an
-explicit diagnostic override and the release bundler always rejects it.
+After the public-data checkpoint exists, inspect its label poses and test it
+against the local webcam. Personal fine-tuning should then capture the same
+`0`–`9` pose vocabulary, keep a personal holdout set, and use a smaller learning
+rate. Do not fine-tune against webcam evaluation images; that would make the
+reported result circular.

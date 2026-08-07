@@ -107,11 +107,9 @@ def load_model_checkpoint(
     """Reconstruct a model from a trusted project checkpoint."""
     checkpoint = torch.load(path, map_location=device, weights_only=False)
     model_name = str(checkpoint["model_name"])
-    class_labels = tuple(checkpoint["class_labels"])
-    if class_labels != CLASS_LABELS:
-        raise ValueError(
-            f"Checkpoint classes {class_labels!r} do not match {CLASS_LABELS!r}"
-        )
+    class_labels = tuple(str(label) for label in checkpoint["class_labels"])
+    if not class_labels or len(set(class_labels)) != len(class_labels):
+        raise ValueError(f"Checkpoint contains invalid classes: {class_labels!r}")
     model = create_model(model_name, class_count=len(class_labels), pretrained=False)
     model.load_state_dict(checkpoint["model_state"])
     model.to(device)

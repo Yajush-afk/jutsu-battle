@@ -2,9 +2,9 @@
 
 ## Model details
 
-- Selected architecture: pending validation comparison
-- Input: padded `160×160` RGB union crop or normalized landmarks
-- Output classes: `0`–`10`, `unknown`
+- Initial architecture: four-block MiniNumberCNN trained from scratch
+- Input: `160×160` RGB image
+- Output classes: `0`–`9`
 - Hand detector state: `no_hands`
 - Runtime: local PyTorch inference
 
@@ -32,6 +32,6 @@ not accept arbitrary finger combinations with the same total count.
 ## Release restrictions
 
 - Smoke checkpoints cannot be released.
-- The test participants must remain unseen during training and model selection.
+- The public test split must remain unused during training and model selection.
 - Every automated acceptance gate must pass.
 - Live webcam throughput must be measured on the target machine.

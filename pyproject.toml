@@ -15,6 +15,8 @@ authors = [
 
 [project.scripts]
 jutsu-capture-numbers = "jutsu_battle.number_identifier.capture:main"
+jutsu-prepare-kaggle = "jutsu_battle.number_identifier.kaggle_dataset:main"
+jutsu-train-kaggle = "jutsu_battle.number_identifier.train_kaggle:main"
 jutsu-build-number-dataset = "jutsu_battle.number_identifier.dataset:main"
 jutsu-train-numbers = "jutsu_battle.number_identifier.train:main"
 jutsu-compare-numbers = "jutsu_battle.number_identifier.compare:main"
@@ -60,5 +62,8 @@ module = [
   "sklearn.*",
   "torchvision",
   "torchvision.*",
+  "tqdm",
+  "tqdm.*",
+  "yaml",
 ]
 ignore_missing_imports = true

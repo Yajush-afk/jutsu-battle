@@ -64,6 +64,7 @@ class NumberPredictor:
             )
         self.device = device
         self.model_name = str(self.metadata["model_name"])
+        self.class_labels = tuple(str(label) for label in self.metadata["class_labels"])
         self.confidence_threshold = confidence_threshold
         preprocess = self.metadata["preprocess"]
         self.preprocess_config = PreprocessConfig(
@@ -72,8 +73,13 @@ class NumberPredictor:
             std=tuple(preprocess["std"]),
         )
         self.transform = build_transform(self.preprocess_config, training=False)
-        self.required_hands = {
+        custom_requirements = {
             item.label: item.required_hands for item in gesture_classes()
+        }
+        uses_custom_vocabulary = self.class_labels == CLASS_LABELS
+        self.required_hands = {
+            label: custom_requirements.get(label) if uses_custom_vocabulary else None
+            for label in self.class_labels
         }
 
     def predict(
@@ -88,7 +94,7 @@ class NumberPredictor:
             return NumberPrediction(
                 label="no_hands",
                 confidence=1.0,
-                probabilities=tuple(0.0 for _ in CLASS_LABELS),
+                probabilities=tuple(0.0 for _ in self.class_labels),
                 hand_count=0,
                 inference_ms=0.0,
             )
@@ -101,7 +107,7 @@ class NumberPredictor:
                 return NumberPrediction(
                     label="no_hands",
                     confidence=1.0,
-                    probabilities=tuple(0.0 for _ in CLASS_LABELS),
+                    probabilities=tuple(0.0 for _ in self.class_labels),
                     hand_count=0,
                     inference_ms=0.0,
                 )
@@ -121,7 +127,7 @@ class NumberPredictor:
             torch.cuda.synchronize(self.device)
         inference_ms = (time.perf_counter() - started) * 1000
         confidence, index = probabilities_tensor.max(dim=0)
-        label = CLASS_LABELS[int(index.item())]
+        label = self.class_labels[int(index.item())]
         confidence_value = float(confidence.item())
         required_hands = self.required_hands[label]
         confidence_rejected = confidence_value < self.confidence_threshold

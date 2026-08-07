@@ -28,6 +28,7 @@ dist/
 
 # Private or generated project data
 data/raw/
+data/external/
 data/processed/
 data/private/
 checkpoints/
@@ -43,4 +44,3 @@ logs/
 *.avi
 models/mediapipe/*.task
 models/mediapipe/*.sha256
-
