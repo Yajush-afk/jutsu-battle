@@ -8,4 +8,3 @@ acceptance:
   p95_inference_ms_maximum: 50.0
 calibration_bins: 10
 warmup_batches: 3
-

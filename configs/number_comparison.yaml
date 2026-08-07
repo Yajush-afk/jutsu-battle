@@ -11,4 +11,3 @@ selection_metric: validation_macro_f1
 capture_root: data/raw/numbers
 manifest_directory: data/manifests
 output_directory: outputs/number_comparison
-

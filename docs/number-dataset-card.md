@@ -29,4 +29,3 @@ CNN class.
 Generated smoke fixtures are not part of the production dataset. Accuracy from
 random frame-level splits is invalid because nearby frames from one participant
 are correlated.
-

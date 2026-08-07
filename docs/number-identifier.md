@@ -140,4 +140,3 @@ python -m jutsu_battle.number_identifier.smoke_data --overwrite
 
 Every smoke checkpoint contains `smoke_only: true`; the live app requires an
 explicit diagnostic override and the release bundler always rejects it.
-

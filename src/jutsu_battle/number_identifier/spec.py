@@ -48,4 +48,3 @@ def class_to_index() -> dict[str, int]:
 def index_to_class() -> dict[int, str]:
     """Map model-output indices to stable class labels."""
     return {gesture.index: gesture.label for gesture in gesture_classes()}
-

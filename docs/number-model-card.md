@@ -35,4 +35,3 @@ not accept arbitrary finger combinations with the same total count.
 - The test participants must remain unseen during training and model selection.
 - Every automated acceptance gate must pass.
 - Live webcam throughput must be measured on the target machine.
-

@@ -87,4 +87,3 @@ Unknown false acceptance:  at most 0.10
 End-to-end camera rate:    at least 20 FPS
 Stable output latency:     at most 750 ms
 ```
-

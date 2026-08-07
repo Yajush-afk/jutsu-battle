@@ -17,4 +17,3 @@ manifests:
   validation: data/manifests/numbers_validation.csv
 capture_root: data/raw/numbers
 output_directory: outputs/number_cnn
-

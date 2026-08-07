@@ -9,4 +9,3 @@ minimum_tracking_confidence: 0.5
 crop_padding_ratio: 0.2
 image_extension: .jpg
 jpeg_quality: 95
-
