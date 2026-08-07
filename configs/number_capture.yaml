@@ -1,0 +1,12 @@
+camera_index: 0
+frame_width: 1280
+frame_height: 720
+clip_duration_seconds: 3.0
+capture_frames_per_second: 5.0
+minimum_detection_confidence: 0.5
+minimum_presence_confidence: 0.5
+minimum_tracking_confidence: 0.5
+crop_padding_ratio: 0.2
+image_extension: .jpg
+jpeg_quality: 95
+

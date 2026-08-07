@@ -41,4 +41,6 @@ logs/
 *.onnx
 *.mp4
 *.avi
+models/mediapipe/*.task
+models/mediapipe/*.sha256
 
