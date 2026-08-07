@@ -45,6 +45,8 @@ mypy_path = "src"
 module = [
   "mediapipe",
   "mediapipe.*",
+  "seaborn",
+  "seaborn.*",
   "sklearn",
   "sklearn.*",
   "torchvision",

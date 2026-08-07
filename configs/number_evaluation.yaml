@@ -1,0 +1,11 @@
+schema_version: 1
+batch_size: 64
+num_workers: 2
+acceptance:
+  macro_f1_minimum: 0.90
+  per_class_recall_minimum: 0.80
+  unknown_false_acceptance_maximum: 0.10
+  p95_inference_ms_maximum: 50.0
+calibration_bins: 10
+warmup_batches: 3
+
