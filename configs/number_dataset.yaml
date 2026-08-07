@@ -1,0 +1,16 @@
+schema_version: 1
+capture_root: data/raw/numbers
+capture_manifest: data/raw/numbers/capture_manifest.csv
+manifest_directory: data/manifests
+split_assignment: data/manifests/number_subject_splits.json
+image_size: 160
+maximum_frames_per_clip: 5
+duplicate_hash_distance: 3
+split_seed: 20260808
+minimum_subjects: 15
+validation_subjects: 2
+test_subjects: 3
+normalization:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+

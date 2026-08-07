@@ -42,5 +42,5 @@ packages = ["jutsu_battle"]
 mypy_path = "src"
 
 [[tool.mypy.overrides]]
-module = ["mediapipe", "mediapipe.*"]
+module = ["mediapipe", "mediapipe.*", "torchvision", "torchvision.*"]
 ignore_missing_imports = true
