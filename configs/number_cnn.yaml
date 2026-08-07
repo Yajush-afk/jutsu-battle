@@ -1,5 +1,6 @@
 schema_version: 1
 model_name: mini_cnn
+pretrained: false
 image_size: 160
 class_count: 12
 batch_size: 32

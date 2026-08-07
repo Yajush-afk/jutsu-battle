@@ -1,0 +1,14 @@
+schema_version: 1
+models:
+  - name: mini_cnn
+    pretrained: false
+  - name: mobilenet_v3_small
+    pretrained: true
+  - name: landmark_mlp
+    pretrained: false
+landmark_feature_size: 128
+selection_metric: validation_macro_f1
+capture_root: data/raw/numbers
+manifest_directory: data/manifests
+output_directory: outputs/number_comparison
+

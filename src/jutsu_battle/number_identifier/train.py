@@ -29,6 +29,7 @@ class TrainingConfig:
     """Reproducible baseline training configuration."""
 
     model_name: str = "mini_cnn"
+    pretrained: bool = False
     image_size: int = 160
     batch_size: int = 32
     maximum_epochs: int = 50
@@ -180,7 +181,7 @@ def train_model(
         shuffle=False,
         **loader_options,
     )
-    model = create_model(config.model_name).to(device)
+    model = create_model(config.model_name, pretrained=config.pretrained).to(device)
     optimizer = AdamW(
         model.parameters(),
         lr=config.learning_rate,
@@ -267,6 +268,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--capture-root", type=Path, required=True)
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--model-name", default="mini_cnn")
+    parser.add_argument("--pretrained", action="store_true")
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--patience", type=int, default=8)
     parser.add_argument("--batch-size", type=int, default=32)
@@ -281,6 +283,7 @@ def main() -> int:
     args = build_parser().parse_args()
     config = TrainingConfig(
         model_name=args.model_name,
+        pretrained=args.pretrained,
         batch_size=args.batch_size,
         maximum_epochs=args.epochs,
         early_stopping_patience=args.patience,

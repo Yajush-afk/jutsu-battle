@@ -7,6 +7,7 @@ from typing import Any, cast
 
 import torch
 from torch import Tensor, nn
+from torchvision.models import MobileNet_V3_Small_Weights, mobilenet_v3_small
 
 from jutsu_battle.number_identifier.spec import CLASS_LABELS
 
@@ -48,10 +49,48 @@ class MiniNumberCNN(nn.Module):
         return cast(Tensor, self.classifier(self.pool(self.features(inputs))))
 
 
-def create_model(model_name: str, *, class_count: int = len(CLASS_LABELS)) -> nn.Module:
+class LandmarkNumberMLP(nn.Module):
+    """Small classifier for two normalized 21-point hand skeletons."""
+
+    def __init__(
+        self,
+        input_features: int = 128,
+        class_count: int = len(CLASS_LABELS),
+    ) -> None:
+        super().__init__()
+        self.network = nn.Sequential(
+            nn.Linear(input_features, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.25),
+            nn.Linear(256, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.2),
+            nn.Linear(128, class_count),
+        )
+
+    def forward(self, inputs: Tensor) -> Tensor:
+        """Return unnormalized class logits."""
+        return cast(Tensor, self.network(inputs))
+
+
+def create_model(
+    model_name: str,
+    *,
+    class_count: int = len(CLASS_LABELS),
+    pretrained: bool = False,
+) -> nn.Module:
     """Construct a model by its stable checkpoint identifier."""
     if model_name == "mini_cnn":
         return MiniNumberCNN(class_count=class_count)
+    if model_name == "mobilenet_v3_small":
+        weights = MobileNet_V3_Small_Weights.DEFAULT if pretrained else None
+        model = mobilenet_v3_small(weights=weights)
+        input_features = model.classifier[-1].in_features
+        model.classifier[-1] = nn.Linear(input_features, class_count)
+        return cast(nn.Module, model)
+    if model_name == "landmark_mlp":
+        return LandmarkNumberMLP(class_count=class_count)
     raise ValueError(f"Unsupported model: {model_name}")
 
 
@@ -73,7 +112,7 @@ def load_model_checkpoint(
         raise ValueError(
             f"Checkpoint classes {class_labels!r} do not match {CLASS_LABELS!r}"
         )
-    model = create_model(model_name, class_count=len(class_labels))
+    model = create_model(model_name, class_count=len(class_labels), pretrained=False)
     model.load_state_dict(checkpoint["model_state"])
     model.to(device)
     model.eval()
